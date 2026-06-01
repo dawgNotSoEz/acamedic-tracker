@@ -169,11 +169,14 @@ model StudySession {
   resourceId   String?
   task         Task?    @relation(fields: [taskId], references: [id])
   resource     Resource?@relation(fields: [resourceId], references: [id])
-  startAt      DateTime
-  endAt        DateTime?
-  durationMins Int?     // stored for quick aggregation; keep in sync with start/end
+  startAt            DateTime
+  currentIntervalStart DateTime? // start of the currently running interval (null when paused)
+  accumulatedMins    Int      @default(0) // minutes accumulated from completed intervals
+  endAt              DateTime?
+  durationMins       Int?     // stored for quick aggregation; keep in sync with start/end
   notes        String?
   category     String?
+  status       StudySessionStatus @default(PAUSED)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -181,6 +184,15 @@ model StudySession {
   @@index([taskId])
   @@index([resourceId])
   @@index([startAt])
+  @@index([currentIntervalStart])
+  @@index([endAt])
+  @@index([status])
   @@index([createdAt])
   @@index([category])
+}
+
+enum StudySessionStatus {
+  ACTIVE
+  PAUSED
+  STOPPED
 }
