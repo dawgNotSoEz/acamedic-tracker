@@ -1,4 +1,6 @@
 import React from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import Progress from '@/components/ui/progress'
 
 type Task = { id: string; title: string; status?: string }
 type Day = { id: string; dayNumber?: number; date?: string; tasks?: Task[] }
@@ -15,21 +17,21 @@ export default function RoadmapHeader({ roadmap }: { roadmap: { id: string; titl
   const progress = Math.max(0, Math.min(100, roadmap?.progress ?? 0))
 
   return (
-    <div className="bg-slate-800 rounded-lg p-4">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-semibold">{roadmap.title}</h2>
-          <p className="text-sm text-slate-400">{weeksCount} weeks • {daysCount} days • {tasksCount} tasks</p>
-        </div>
-
-        <div className="w-40">
-          <div className="text-sm text-slate-300 mb-1">Progress</div>
-          <div className="w-full h-3 bg-slate-700 rounded overflow-hidden">
-            <div className="h-3 bg-emerald-500" style={{ width: `${progress}%` }} />
+    <Card className="p-0">
+      <CardContent>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <CardTitle>{roadmap.title}</CardTitle>
+            <p className="text-sm text-slate-400">{weeksCount} weeks • {daysCount} days • {tasksCount} tasks</p>
           </div>
-          <div className="text-xs text-slate-400 mt-1">{progress}% complete • {completedCount} done</div>
+
+          <div className="w-40">
+            <div className="text-sm text-slate-300 mb-1">Progress</div>
+            <Progress percent={progress} />
+            <div className="text-xs text-slate-400 mt-1">{progress}% complete • {completedCount} done</div>
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }

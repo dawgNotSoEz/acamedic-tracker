@@ -1,4 +1,5 @@
 import React from 'react'
+import { CardContent } from '@/components/ui/card'
 
 export default function TodaysTasks({ tasks }: { tasks?: any[] }) {
   return (

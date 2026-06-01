@@ -1,21 +1,27 @@
 import React from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import Button from '@/components/ui/button'
 
 export default function ActiveSessionPanel({ task }: { task?: any }) {
   return (
-    <div className="bg-slate-800 rounded-lg p-4">
-      <h4 className="font-semibold">Active Session</h4>
-      {task ? (
-        <div className="mt-3">
-          <div className="text-sm text-slate-200">{task.title}</div>
-          <div className="text-2xl font-mono mt-2">25:00</div>
-          <div className="mt-3 flex gap-2">
-            <button className="px-2 py-1 bg-emerald-600 rounded">Pause</button>
-            <button className="px-2 py-1 bg-red-600 rounded">Stop</button>
+    <Card>
+      <CardContent>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Active Session</CardTitle>
+            {task ? <div className="text-sm text-slate-200">{task.title}</div> : <div className="text-slate-400 mt-2">No active session</div>}
           </div>
+          {task && (
+            <div className="text-right">
+              <div className="text-2xl font-mono">25:00</div>
+              <div className="mt-3 flex gap-2 justify-end">
+                <Button className="bg-amber-500 hover:bg-amber-400">Pause</Button>
+                <Button className="bg-red-600 hover:bg-red-500">Stop</Button>
+              </div>
+            </div>
+          )}
         </div>
-      ) : (
-        <div className="text-slate-400 mt-2">No active session</div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   )
 }
