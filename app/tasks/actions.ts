@@ -1,3 +1,5 @@
+"use server"
+
 import { prisma } from '../../lib/prisma'
 import { revalidatePath } from 'next/cache'
 
@@ -12,7 +14,7 @@ export async function createTaskAction(formData: FormData) {
   const estimateMins = formData.get('estimateMins')
     ? Number(formData.get('estimateMins'))
     : null
-  const priority = (formData.get('priority') as string) ?? 'MEDIUM'
+  const priority = (formData.get('priority') as any) ?? 'MEDIUM'
   const category = formData.get('category') ? String(formData.get('category')) : null
 
   await prisma.task.create({
@@ -45,7 +47,7 @@ export async function updateTaskAction(formData: FormData) {
   const estimateMins = formData.get('estimateMins')
     ? Number(formData.get('estimateMins'))
     : null
-  const priority = (formData.get('priority') as string) ?? 'MEDIUM'
+  const priority = (formData.get('priority') as any) ?? 'MEDIUM'
   const category = formData.get('category') ? String(formData.get('category')) : null
 
   await prisma.task.update({

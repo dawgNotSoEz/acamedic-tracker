@@ -37,7 +37,7 @@ export default function ActiveSession({ session }: { session: Session | null }) 
     return (
       <div className="p-4 border rounded">
         <h3 className="font-medium">No active session</h3>
-        <form action={startSessionAction} className="mt-3 space-y-2">
+        <form action={async (formData) => { await startSessionAction(formData); }} className="mt-3 space-y-2">
           <div>
             <label className="block text-sm">Task ID (optional)</label>
             <input name="taskId" className="mt-1 block w-full" />

@@ -1,4 +1,4 @@
-import { prisma } from '../../../../lib/prisma'
+import { prisma } from "@/lib/prisma";
 import TaskForm from '../../components/TaskForm'
 
 type Props = { params: { id: string } }
@@ -11,7 +11,6 @@ export default async function Page({ params }: Props) {
   return (
     <div className="max-w-3xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Edit Task</h1>
-      {/* @ts-expect-error Server -> Client prop serialization */}
       <TaskForm task={task} />
     </div>
   )

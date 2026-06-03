@@ -1,5 +1,5 @@
-import { prisma } from '../../../../lib/prisma'
-import { deleteTaskAction, completeTaskAction } from '../../actions'
+import { prisma } from "@/lib/prisma";
+import { deleteTaskAction, completeTaskAction } from "../actions";
 
 type Props = { params: { id: string } }
 

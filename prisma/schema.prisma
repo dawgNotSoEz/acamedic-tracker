@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,51 +8,163 @@ datasource db {
 }
 
 model Roadmap {
-  id         String   @id @default(uuid())
-  title      String
+  id          String   @id @default(uuid())
+  title       String
   description String?
-  weeks      Week[]   @relation("RoadmapWeeks")
-  tasks      Task[]   @relation("RoadmapTasks")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tasks       Task[]   @relation("RoadmapTasks")
+  weeks       Week[]   @relation("RoadmapWeeks")
 
-  @@map("roadmaps")
   @@index([title])
+  @@map("roadmaps")
 }
 
 model Week {
-  id         String   @id @default(uuid())
-  roadmapId  String
-  roadmap    Roadmap  @relation("RoadmapWeeks", fields: [roadmapId], references: [id])
-  number     Int      // week number within roadmap (1..N)
-  title      String?
-  startDate  DateTime?
-  endDate    DateTime?
-  days       Day[]    @relation("WeekDays")
-  tasks      Task[]   @relation("WeekTasks")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String    @id @default(uuid())
+  roadmapId String
+  number    Int
+  title     String?
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  days      Day[]     @relation("WeekDays")
+  tasks     Task[]    @relation("WeekTasks")
+  roadmap   Roadmap   @relation("RoadmapWeeks", fields: [roadmapId], references: [id])
 
-  @@map("weeks")
   @@unique([roadmapId, number])
   @@index([roadmapId])
+  @@map("weeks")
 }
 
 model Day {
-  id         String   @id @default(uuid())
-  weekId     String
-  week       Week     @relation("WeekDays", fields: [weekId], references: [id])
-  dayNumber  Int      // 0..6 or 1..7
-  date       DateTime? // optional calendar date
-  title      String?
-  tasks      Task[]   @relation("DayTasks")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String    @id @default(uuid())
+  weekId    String
+  dayNumber Int
+  date      DateTime?
+  title     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  week      Week      @relation("WeekDays", fields: [weekId], references: [id])
+  tasks     Task[]    @relation("DayTasks")
 
-  @@map("days")
   @@unique([weekId, dayNumber])
   @@index([weekId])
   @@index([date])
+  @@map("days")
+}
+
+model Task {
+  id           String         @id @default(uuid())
+  roadmapId    String?
+  weekId       String?
+  dayId        String?
+  title        String
+  description  String?
+  estimateMins Int?
+  status       TaskStatus     @default(TODO)
+  priority     Priority       @default(MEDIUM)
+  category     String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  sessions     StudySession[]
+  resources    TaskResource[]
+  day          Day?           @relation("DayTasks", fields: [dayId], references: [id])
+  roadmap      Roadmap?       @relation("RoadmapTasks", fields: [roadmapId], references: [id])
+  week         Week?          @relation("WeekTasks", fields: [weekId], references: [id])
+
+  @@index([roadmapId])
+  @@index([weekId])
+  @@index([dayId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+  @@map("tasks")
+}
+
+model Resource {
+  id         String         @id @default(uuid())
+  title      String
+  type       String
+  url        String?
+  content    String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  category   String?
+  difficulty Difficulty?    @default(MEDIUM)
+  tags       ResourceTag[]
+  sessions   StudySession[]
+  tasks      TaskResource[]
+
+  @@index([type])
+  @@index([createdAt])
+  @@map("resources")
+}
+
+model Tag {
+  id        String        @id @default(uuid())
+  name      String        @unique
+  createdAt DateTime      @default(now())
+  resources ResourceTag[]
+
+  @@map("tags")
+}
+
+model ResourceTag {
+  id         String   @id @default(uuid())
+  resourceId String
+  tagId      String
+  createdAt  DateTime @default(now())
+  resource   Resource @relation(fields: [resourceId], references: [id])
+  tag        Tag      @relation(fields: [tagId], references: [id])
+
+  @@unique([resourceId, tagId])
+  @@index([resourceId])
+  @@index([tagId])
+  @@map("resource_tags")
+}
+
+model TaskResource {
+  id         String   @id @default(uuid())
+  taskId     String
+  resourceId String
+  createdAt  DateTime @default(now())
+  resource   Resource @relation(fields: [resourceId], references: [id])
+  task       Task     @relation(fields: [taskId], references: [id])
+
+  @@unique([taskId, resourceId])
+  @@index([taskId])
+  @@index([resourceId])
+  @@map("task_resources")
+}
+
+model StudySession {
+  id                   String             @id @default(uuid())
+  taskId               String?
+  resourceId           String?
+  startAt              DateTime
+  endAt                DateTime?
+  durationMins         Int?
+  notes                String?
+  category             String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  accumulatedMins      Int                @default(0)
+  currentIntervalStart DateTime?
+  status               StudySessionStatus @default(PAUSED)
+  resource             Resource?          @relation(fields: [resourceId], references: [id])
+  task                 Task?              @relation(fields: [taskId], references: [id])
+
+  @@index([taskId])
+  @@index([resourceId])
+  @@index([startAt])
+  @@index([currentIntervalStart])
+  @@index([endAt])
+  @@index([status])
+  @@index([createdAt])
+  @@index([category])
+  @@map("study_sessions")
 }
 
 enum TaskStatus {
@@ -73,122 +179,10 @@ enum Priority {
   HIGH
 }
 
-model Task {
-  id            String         @id @default(uuid())
-  roadmapId     String?        // optional direct link
-  roadmap       Roadmap?       @relation("RoadmapTasks", fields: [roadmapId], references: [id])
-  weekId        String? 
-  week          Week?          @relation("WeekTasks", fields: [weekId], references: [id])
-  dayId         String?
-  day           Day?           @relation("DayTasks", fields: [dayId], references: [id])
-  title         String
-  description   String?
-  estimateMins  Int?           // planned minutes
-  status        TaskStatus     @default(TODO)
-  priority      Priority       @default(MEDIUM)
-  category      String?        // freeform category or later normalize
-  sessions      StudySession[]
-  resources     TaskResource[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-
-  @@map("tasks")
-  @@index([roadmapId])
-  @@index([weekId])
-  @@index([dayId])
-  @@index([status])
-  @@index([priority])
-  @@index([createdAt])
-}
-
-model Resource {
-  id          String         @id @default(uuid())
-  title       String
-  type        String         // LINK | NOTE | FILE (use enum if preferred)
-  url         String?
-  content     String?        // notes or description
-  category    String?
-  difficulty  Difficulty?    @default(MEDIUM)
-  tags        ResourceTag[]
-  tasks       TaskResource[]
-  sessions    StudySession[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-
-  @@map("resources")
-  @@index([type])
-  @@index([createdAt])
-}
-
 enum Difficulty {
   EASY
   MEDIUM
   HARD
-}
-
-model Tag {
-  id        String        @id @default(uuid())
-  name      String        @unique
-  resources ResourceTag[]
-  createdAt DateTime      @default(now())
-
-  @@map("tags")
-}
-
-model ResourceTag {
-  id         String   @id @default(uuid())
-  resourceId String
-  tagId      String
-  resource   Resource @relation(fields: [resourceId], references: [id])
-  tag        Tag      @relation(fields: [tagId], references: [id])
-  createdAt  DateTime @default(now())
-
-  @@map("resource_tags")
-  @@unique([resourceId, tagId])
-  @@index([resourceId])
-  @@index([tagId])
-}
-
-model TaskResource {
-  id         String   @id @default(uuid())
-  taskId     String
-  resourceId String
-  task       Task     @relation(fields: [taskId], references: [id])
-  resource   Resource @relation(fields: [resourceId], references: [id])
-  createdAt  DateTime @default(now())
-
-  @@map("task_resources")
-  @@unique([taskId, resourceId])
-  @@index([taskId])
-  @@index([resourceId])
-}
-
-model StudySession {
-  id           String   @id @default(uuid())
-  taskId       String? 
-  resourceId   String?
-  task         Task?    @relation(fields: [taskId], references: [id])
-  resource     Resource?@relation(fields: [resourceId], references: [id])
-  startAt            DateTime
-  currentIntervalStart DateTime? // start of the currently running interval (null when paused)
-  accumulatedMins    Int      @default(0) // minutes accumulated from completed intervals
-  endAt              DateTime?
-  durationMins       Int?     // stored for quick aggregation; keep in sync with start/end
-  notes        String?
-  category     String?
-  status       StudySessionStatus @default(PAUSED)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@map("study_sessions")
-  @@index([taskId])
-  @@index([resourceId])
-  @@index([startAt])
-  @@index([currentIntervalStart])
-  @@index([endAt])
-  @@index([status])
-  @@index([createdAt])
-  @@index([category])
 }
 
 enum StudySessionStatus {

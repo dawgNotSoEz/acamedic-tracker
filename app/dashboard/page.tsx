@@ -1,4 +1,6 @@
-import { prisma } from '../../lib/prisma'
+export const dynamic = 'force-dynamic';
+
+import { prisma } from "@/lib/prisma";
 import ActiveSessionComponent from '../study-sessions/components/ActiveSession'
 
 // shadcn/ui card imports - adjust path if your project uses a different location

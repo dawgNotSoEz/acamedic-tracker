@@ -1,3 +1,5 @@
+"use server"
+
 import { prisma } from '../../lib/prisma'
 import { revalidatePath } from 'next/cache'
 
@@ -26,12 +28,12 @@ export async function createResourceAction(formData: FormData) {
 
   const url = formData.get('url') ? String(formData.get('url')) : null
   const category = formData.get('category') ? String(formData.get('category')) : null
-  const difficulty = (formData.get('difficulty') as string) ?? 'MEDIUM'
+  const difficulty = (formData.get('difficulty') as any) ?? 'MEDIUM'
   const tagsRaw = formData.get('tags') ? String(formData.get('tags')) : ''
   const tagNames = tagsRaw.split(',').map((t) => t.trim()).filter(Boolean)
 
   const resource = await prisma.resource.create({
-    data: { title, url, category, difficulty },
+    data: { title, url, category, difficulty, type: url ? "LINK" : "NOTE" },
   })
 
   if (tagNames.length > 0) {
@@ -58,7 +60,7 @@ export async function updateResourceAction(formData: FormData) {
 
   const url = formData.get('url') ? String(formData.get('url')) : null
   const category = formData.get('category') ? String(formData.get('category')) : null
-  const difficulty = (formData.get('difficulty') as string) ?? 'MEDIUM'
+  const difficulty = (formData.get('difficulty') as any) ?? 'MEDIUM'
   const tagsRaw = formData.get('tags') ? String(formData.get('tags')) : ''
   const tagNames = tagsRaw.split(',').map((t) => t.trim()).filter(Boolean)
 
